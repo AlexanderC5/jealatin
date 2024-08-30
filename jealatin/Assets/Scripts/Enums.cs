@@ -21,8 +21,8 @@ public static class Enums
           East = 1,
           South = 2,
           West = 3,
-          Bump = 4,
-          Reset = 5
+          None = 4,
+          Bump = 5
      }
 
      public enum GameMode

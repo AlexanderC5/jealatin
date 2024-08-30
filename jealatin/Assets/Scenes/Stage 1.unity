@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf33b78904b0e9c469b275e77b678be0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerColor: 2
+  playerColor: 1
   MapSize: {x: 0, y: 0}
   CameraOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &140154841
