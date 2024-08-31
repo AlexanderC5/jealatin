@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Enums.Color defaultColor;
 
     [SerializeField] private Sprite[] colorPickerSprite = new Sprite[2];
+    [SerializeField] private Sprite[] expressionsSprites = new Sprite[15];
 
 #region Properties
     private Vector2 pos; // Current x,y location of the player on the grid
@@ -65,6 +66,7 @@ public class Player : MonoBehaviour
         SetPlayerLocation(this.Pos, defaultFacing); // Update facing-direction of player on Sprite
 
         UpdateAnimationSpeed();
+        UpdateExpression();
     }
 
     void Update()
@@ -214,6 +216,7 @@ public class Player : MonoBehaviour
         actionStack.Push(moveDir);
 
         SetPlayerLocation((Vector2) this.transform.position + nextPos, moveDir);
+        UpdateExpression();
         
         PlayerAnimator.SetInteger("AnimationType", 1); // 1 = movement-type animation
         PlayerAnimator.SetTrigger(AnimTriggerName(moveDir));
@@ -247,6 +250,9 @@ public class Player : MonoBehaviour
         }
         
         GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
+
+        this.Facing = moveDir;
+        UpdateExpression();
 
         // Hide the Sprites for invalid-colors
         PlayerSprite[2].sprite = colorPickerSprite[0];
@@ -413,6 +419,7 @@ public class Player : MonoBehaviour
     public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = true)
     {   
         Color = color; // Set this to false if lerping with the function directly below
+        UpdateExpression();
 
         if (addToColorStack) { colorStack.Push(color); }
 
@@ -473,6 +480,7 @@ public class Player : MonoBehaviour
         colorStack.Clear();
         SetColor(defaultColor, true);
 
+        UpdateExpression();
         isDead = false;
         GameManager.Instance.GameMode = Enums.GameMode.Game;
     }
@@ -496,5 +504,24 @@ public class Player : MonoBehaviour
     private void UpdateAnimationSpeed()
     {
         PlayerAnimator.speed = GameManager.Instance.animationSpeed;
+    }
+
+    private void UpdateExpression()
+    {
+        int spriteIndex = 0; // 0 = No sprite
+        PlayerSprite[1].flipX = false;
+
+        if (this.Facing != Enums.Action.North) // If facing north, leave index at 0
+        {
+            spriteIndex = (int) this.Color; // Sets sprite to 1-7 (South-facing)
+
+            if (this.Facing != Enums.Action.South) // Check if facing to the side
+            {
+                if (facing == Enums.Action.West) PlayerSprite[1].flipX = true; // If facing Left, flip the sprite
+                spriteIndex += 7;
+            }
+        }
+        
+        PlayerSprite[1].sprite = expressionsSprites[spriteIndex];
     }
 }
