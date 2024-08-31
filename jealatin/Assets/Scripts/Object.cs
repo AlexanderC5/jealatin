@@ -10,8 +10,8 @@ public class Object : MonoBehaviour
     [SerializeField] private Enums.Color defaultColor;
     private Vector2 defaultPos;
 
-    private int color; // R Y B color1 of object
-    public int Color
+    private Enums.Color color; // R Y B color1 of object
+    public Enums.Color Color
     {
         get => color;
         private set => color = value;
@@ -42,11 +42,15 @@ public class Object : MonoBehaviour
 
     public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = false)
     {
-        if (updateColor) { Color = (int) color; }
+        Color = color;
         
         if (addToColorStack) { colorStack.Push(color); }
 
-        ObjectSprite.color = GameManager.Instance.Palette[color];
+        if (updateColor) { ObjectSprite.color = GameManager.Instance.Palette[color]; }
+    }
+    public void SetLerpColor(Enums.Color color1, Enums.Color color2, float percent)
+    {
+        ObjectSprite.color = UnityEngine.Color.Lerp(GameManager.Instance.Palette[color1], GameManager.Instance.Palette[color2], percent);
     }
 
     public void MoveObject(Enums.Action moveDir)
@@ -68,11 +72,6 @@ public class Object : MonoBehaviour
                 break;
         }
         
-        // Stop any previous animations
-        // ObjectAnimator.SetBool("Move Up", false);
-        // ObjectAnimator.SetBool("Move Right", false);
-        // ObjectAnimator.SetBool("Move Down", false);
-        // ObjectAnimator.SetBool("Move Left", false);
         StartCoroutine(MoveObjectCoroutine(nextDir));
     }
 

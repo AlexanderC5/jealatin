@@ -20,8 +20,8 @@ public class Player : MonoBehaviour
     public Vector2 Pos { get => pos; set => pos = value; }
     private Enums.Action facing; // N E S W direction of player sprite
     public Enums.Action Facing { get => facing; set => facing = value; }
-    private int color; // R Y B color1 of player
-    public int Color
+    private Enums.Color color; // R Y B color1 of player
+    public Enums.Color Color
     {
         get => color;
         set => color = value;
@@ -38,13 +38,15 @@ public class Player : MonoBehaviour
 
 
     private Enums.Color bumpColorSelect; // Which color (R,Y,B) was selected via a keyboard press?
-    int transferableColors; // Which colors (R,Y,B) can be transferred between player and object?
+    Enums.Color transferableColors; // Which colors (R,Y,B) can be transferred between player and object?
 
-    private SpriteRenderer PlayerSprite;
+    private SpriteRenderer[] PlayerSprite = new SpriteRenderer[2]; // 0 for slime body, 1 for expressions
+    private Animator PlayerAnimator;
 
     void Awake()
     {
-        PlayerSprite = GetComponentInChildren<SpriteRenderer>();
+        PlayerSprite = GetComponentsInChildren<SpriteRenderer>();
+        PlayerAnimator = GetComponentInChildren<Animator>();
         if (defaultPos != Vector2.zero) this.transform.position = defaultPos;
         this.transform.position = new Vector3(Mathf.Round(this.transform.position.x), Mathf.Round(this.transform.position.y), 0);
     }
@@ -57,7 +59,7 @@ public class Player : MonoBehaviour
             Debug.Log("Player cannot start Green-colored. Changing to Blue.");
             defaultColor = Enums.Color.Blue;
         }
-        SetColor(defaultColor, true, true);
+        SetColor(defaultColor, true);
         
         SetPlayerLocation(this.Pos, defaultFacing); // Update facing-direction of player on Sprite
     }
@@ -100,7 +102,7 @@ public class Player : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                if (((transferableColors & (int) Enums.Color.Red) == 000) || this.Color == (int) Enums.Color.Red)
+                if (((transferableColors & Enums.Color.Red) == Enums.Color.None) || this.Color == Enums.Color.Red)
                 {
                     // Play Error sfx - can't select this color!
                 }
@@ -108,7 +110,7 @@ public class Player : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.G) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
-                if (((transferableColors & (int) Enums.Color.Yellow) == 000) || this.Color == (int) Enums.Color.Yellow)
+                if (((transferableColors & Enums.Color.Red) == Enums.Color.None) || this.Color == Enums.Color.Yellow)
                 {
                     // Play Error sfx - can't select this color!
                 }
@@ -116,7 +118,7 @@ public class Player : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.B) || Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             {
-                if (((transferableColors & (int) Enums.Color.Blue) == 000) || this.Color == (int) Enums.Color.Blue)
+                if (((transferableColors & Enums.Color.Red) == Enums.Color.None) || this.Color == Enums.Color.Blue)
                 {
                     // Play Error sfx - can't select this color!
                 }
@@ -125,13 +127,18 @@ public class Player : MonoBehaviour
             
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Z)) // Cancel the bump action
             {
-                transferableColors = -1;
+                transferableColors = (Enums.Color) (-1);
             }
         }
     }
 
     private void Move(Enums.Action dir)
     {
+        PlayerAnimator.ResetTrigger("Up");
+        PlayerAnimator.ResetTrigger("Right");
+        PlayerAnimator.ResetTrigger("Down");
+        PlayerAnimator.ResetTrigger("Left");
+
         // Set nextPos to the next location the player will move to
         Vector2 nextPos = Vector2.zero;
         switch (dir)
@@ -208,8 +215,12 @@ public class Player : MonoBehaviour
 
         actionStack.Push(moveDir);
 
-        //this.transform.position += new Vector3(nextPos.x, nextPos.y);
+        Debug.Log("Move in this dir: " + nextPos.x + " | " + nextPos.y);
         SetPlayerLocation((Vector2) this.transform.position + nextPos, moveDir);
+        
+        PlayerAnimator.SetInteger("AnimationType", 1); // 1 = movement-type animation
+        PlayerAnimator.SetTrigger(AnimTriggerName(moveDir));
+
         if (pushableObject != null)
         {
             pushableObject.GetComponent<Object>().MoveObject(moveDir);
@@ -221,22 +232,21 @@ public class Player : MonoBehaviour
         {
             yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         }
-
-        // TODO: Aniamte
+        PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
         
         isInputDisabled = false;
     }
 
     private IEnumerator BumpAction(Enums.Action moveDir, Object bumpedObject)
     {
-        transferableColors = (int) (this.Color ^ bumpedObject.Color); // Which colors can be transferred between player & object?
-        if (transferableColors == 000) // No colors are eligible for a transfer
+        transferableColors = this.Color ^ bumpedObject.Color; // Which colors can be transferred between player & object?
+        if (transferableColors == Enums.Color.None) // No colors are eligible for a transfer
         {
             yield break;
         }
-        if (bumpedObject.Color == 000) // Only the player can transfer colors
+        if (bumpedObject.Color == Enums.Color.None) // Only the player can transfer colors
         {
-            if (this.Color == 100 || this.Color == 010 || this.Color == 001) yield break;
+            if (this.Color == Enums.Color.Red || this.Color == Enums.Color.Yellow || this.Color == Enums.Color.Blue) yield break;
         }
         
         isInputDisabled = true;
@@ -250,29 +260,51 @@ public class Player : MonoBehaviour
 
         Debug.Log("Waiting for player to choose a transferable color...");
 
-        yield return new WaitUntil(() => ((transferableColors & (int) bumpColorSelect) != 000) || transferableColors == -1); // Wait for the player to make a selection
+        yield return new WaitUntil(() => ((transferableColors & bumpColorSelect) != Enums.Color.None) || transferableColors == (Enums.Color) (-1)); // Wait for the player to make a selection
         
-        if (transferableColors != -1) // If not cancelled:
-        {
-            actionStack.Push(moveDir); // Add both the moveDir and a 'bump' action
-            actionStack.Push(Enums.Action.Bump);
-            this.SetColor((Enums.Color) this.Color ^ bumpColorSelect, true, true);
-            bumpedObject.SetColor((Enums.Color) bumpedObject.Color ^ bumpColorSelect, true, true);
-
-            RaycastHit2D hit0 = Physics2D.Raycast(this.transform.position, Vector2.up, 0.1f); // Send out a raycast to check the current tile
-            if (hit0.collider != null) // If the player is currently on top of another object (the object has the same color)
-            {
-                hit0.transform.gameObject.GetComponent<Object>().SetColor((Enums.Color) this.Color, true, true);
-            }
-        }
-        
-        // TODO: Animate the UI hiding
-
         isInputDisabled = true;
+
+        // TODO: Animate the UI hiding
 
         yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
 
-        // TODO: Animate the slime consuming the object and changing colors
+        if (transferableColors != (Enums.Color) (-1)) // If color-transfer was not cancelled:
+        {
+            actionStack.Push(moveDir); // Add both the moveDir and a 'bump' action
+            actionStack.Push(Enums.Action.Bump);
+
+            // bumpedObject.SetColor((Enums.Color) bumpedObject.Color ^ bumpColorSelect, true, true);
+
+            PlayerAnimator.SetInteger("AnimationType", 2); // 1 = bump-type animation
+            PlayerAnimator.SetTrigger(AnimTriggerName(moveDir));
+
+            Enums.Color oldPlayerColor = this.Color; // Store the color of the player pre-transfer
+            SetColor( this.Color ^ bumpColorSelect, true, false); // Only update the player's color in the code; the visuals are handled by the lerp
+
+            Enums.Color oldBumpedColor = bumpedObject.Color; 
+            bumpedObject.SetColor(bumpedObject.Color ^ bumpColorSelect, true, false);
+
+            Enums.Color oldConsumedColor = (Enums.Color) (-1);
+            RaycastHit2D hit0 = Physics2D.Raycast(this.transform.position, Vector2.up, 0.1f); // Send out a raycast to check the current tile
+            if (hit0.collider != null) // If the player is currently on top of another object (the object has the same color)
+            {
+                oldConsumedColor = hit0.transform.gameObject.GetComponent<Object>().Color;
+                hit0.transform.gameObject.GetComponent<Object>().SetColor( this.Color, true, false);
+            }
+
+            for (float f = 0.05f; f <= 1f; f += 0.05f) // Lerp all relevant colors
+            {
+                yield return new WaitForSeconds(0.2f / 20 / GameManager.Instance.animationSpeed);
+                this.SetLerpColor(oldPlayerColor, this.Color, f);
+                bumpedObject.SetLerpColor(oldBumpedColor, bumpedObject.Color, f);
+                if ((int)oldConsumedColor != -1)
+                {
+                    hit0.transform.gameObject.GetComponent<Object>().SetLerpColor(oldConsumedColor, this.Color, f);
+                }
+            }
+            PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
+        
+        }
 
         bumpColorSelect = Enums.Color.None;
         transferableColors = 0;
@@ -338,7 +370,7 @@ public class Player : MonoBehaviour
         {
             if (colorStack.Count <= 1) Debug.Log("No colors in the color stack to pop!");
             colorStack.Pop();
-            this.SetColor(colorStack.Peek(), false, true);
+            this.SetColor(colorStack.Peek(), false);
 
             hit.transform.gameObject.GetComponent<Object>().UndoColor();
             
@@ -372,13 +404,21 @@ public class Player : MonoBehaviour
         undoDelayCoroutine = null;
     }
 
-    public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = false)
-    {
-        if (updateColor) { Color = (int) color; }
-        
+    public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = true)
+    {   
+        Color = color; // Set this to false if lerping with the function directly below
+
         if (addToColorStack) { colorStack.Push(color); }
 
-        PlayerSprite.color = GameManager.Instance.Palette[color];
+        if (updateColor)
+        {
+            PlayerSprite[0].color = GameManager.Instance.Palette[color];
+        }
+    }
+
+    public void SetLerpColor(Enums.Color color1, Enums.Color color2, float percent)
+    {
+        PlayerSprite[0].color = UnityEngine.Color.Lerp(GameManager.Instance.Palette[color1], GameManager.Instance.Palette[color2], percent);
     }
 
     public void SetPlayerLocation(Vector2 position, Enums.Action facing = Enums.Action.None)
@@ -401,6 +441,23 @@ public class Player : MonoBehaviour
         
         // Reset player color & add to colorStack
         colorStack.Clear();
-        SetColor(defaultColor, true, true);
+        SetColor(defaultColor, true);
+    }
+
+    private string AnimTriggerName(Enums.Action dir)
+    {
+        switch (dir)
+        {
+            case Enums.Action.North:
+                return "Up";
+            case Enums.Action.East:
+                return "Right";
+            case Enums.Action.South:
+                return "Down";
+            case Enums.Action.West:
+                return "Left";
+            default:
+                return "";
+        }
     }
 }
