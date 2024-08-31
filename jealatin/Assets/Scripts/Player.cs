@@ -231,6 +231,10 @@ public class Player : MonoBehaviour
         {
             yield break;
         }
+        if (bumpedObject.Color == 000) // Only the player can transfer colors
+        {
+            if (this.Color == 100 || this.Color == 010 || this.Color == 001) yield break;
+        }
         
         isInputDisabled = true;
         GameManager.Instance.GameMode = Enums.GameMode.ColorSelect; // Keyboard controls selects color instead of moving
@@ -251,6 +255,12 @@ public class Player : MonoBehaviour
             actionStack.Push(Enums.Action.Bump);
             this.SetColor((Enums.Color) this.Color ^ bumpColorSelect, true, true);
             bumpedObject.SetColor((Enums.Color) bumpedObject.Color ^ bumpColorSelect, true, true);
+
+            RaycastHit2D hit0 = Physics2D.Raycast(this.transform.position, Vector2.up, 0.1f); // Send out a raycast to check the current tile
+            if (hit0.collider != null) // If the player is currently on top of another object (the object has the same color)
+            {
+                hit0.transform.gameObject.GetComponent<Object>().SetColor((Enums.Color) this.Color, true, true);
+            }
         }
         
         // TODO: Animate the UI hiding
@@ -320,7 +330,7 @@ public class Player : MonoBehaviour
         // Find the object being targetted by the bump or push
         RaycastHit2D hit = Physics2D.Raycast(this.transform.position + (Vector3) dirMoved, dirMoved, 0.1f); // Send out a raycast to check ONE tile ahead of this sprite
         
-        // If bump, undo the target object's color stack too
+        // If bump, undo the target object's color stack too. Check for any object on top of the player.
         if (isLastActionBump)
         {
             if (colorStack.Count <= 1) Debug.Log("No colors in the color stack to pop!");
@@ -328,6 +338,12 @@ public class Player : MonoBehaviour
             this.SetColor(colorStack.Peek(), false, true);
 
             hit.transform.gameObject.GetComponent<Object>().UndoColor();
+            
+            RaycastHit2D hit0 = Physics2D.Raycast(this.transform.position, dirMoved, 0.1f); // Send out a raycast to check the current tile
+            if (hit0.collider != null) // If the player is currently on top of another object (the object has the same color)
+            {
+                hit0.transform.gameObject.GetComponent<Object>().UndoColor();
+            }
         }
         else // If not a bump, undo the move (and push?) action
         {            
@@ -355,29 +371,6 @@ public class Player : MonoBehaviour
 
     public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = false)
     {
-        // if (updateColor)
-        // {
-        //     Color1 = Enums.Color.None;
-        //     Color2 = Enums.Color.None;
-
-        //     if (color == Enums.Color.Violet)
-        //     {
-        //         Color1 = Enums.Color.Red;
-        //         Color2 = Enums.Color.Blue;
-        //     }
-        //     else if (color == Enums.Color.Orange)
-        //     {
-        //         Color1 = Enums.Color.Red;
-        //         Color2 = Enums.Color.Yellow;
-        //     }
-        //     else if (color == Enums.Color.Green)
-        //     {
-        //         Color1 = Enums.Color.Yellow;
-        //         Color2 = Enums.Color.Blue;
-        //     }
-        //     else Color1 = color;
-        // }
-
         if (updateColor) { Color = (int) color; }
         
         if (addToColorStack) { colorStack.Push(color); }
