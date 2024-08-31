@@ -31,9 +31,10 @@ public static class Enums
      public enum GameMode
      {
           Game = 0,
-          ColorSelect = 1,
-          MainMenu = 2,
-          PauseMenu = 3
+          NoInteraction = 1, // For animations & other things that do not accept keypresses
+          ColorSelect = 2,
+          MainMenu = 3,
+          PauseMenu = 4
 
      }
 

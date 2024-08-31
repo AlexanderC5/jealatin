@@ -34,7 +34,7 @@ public class Object : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.GameMode == Enums.GameMode.Game && Input.GetKeyDown(KeyCode.R))
+        if ((GameManager.Instance.GameMode == Enums.GameMode.Game) && Input.GetKeyDown(KeyCode.R))
         {
             this.FullReset();
         }
@@ -81,6 +81,8 @@ public class Object : MonoBehaviour
 
         if (isAnimated) // Incredibly inefficient animation code using booleans but oh well :D
         {
+            UpdateAnimationSpeed();
+
             ObjectAnimator.ResetTrigger("Move Up");
             ObjectAnimator.ResetTrigger("Move Right");
             ObjectAnimator.ResetTrigger("Move Down");

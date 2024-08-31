@@ -21,7 +21,9 @@ public class GameManager : MonoBehaviour
     private Enums.GameMode gameMode;
     public Enums.GameMode GameMode { get => gameMode; set => gameMode = value; }
 
+private float defaultAnimationSpeed;
     public float animationSpeed = 1f;
+    public float shiftSpeed = 2f;
     public float pushSpeedMultiplier = 0.75f;
 
     void Awake()
@@ -29,6 +31,7 @@ public class GameManager : MonoBehaviour
         if (Instance != null)
             Destroy(Instance);
         Instance = this;
+        defaultAnimationSpeed = animationSpeed;
     }
 
     void OnDestroy()
@@ -43,5 +46,10 @@ public class GameManager : MonoBehaviour
     {
         if (gameMode == Enums.GameMode.Game) return true;
         return false;
+    }
+
+    public void ResetAnimationSpeed()
+    {
+        animationSpeed = defaultAnimationSpeed;
     }
 }

@@ -15,6 +15,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Enums.Action defaultFacing = Enums.Action.South;
     [SerializeField] private Enums.Color defaultColor;
 
+    [SerializeField] private Sprite[] colorPickerSprite = new Sprite[2];
+
 #region Properties
     private Vector2 pos; // Current x,y location of the player on the grid
     public Vector2 Pos { get => pos; set => pos = value; }
@@ -33,14 +35,13 @@ public class Player : MonoBehaviour
     private Stack<Enums.Action> actionStack = new Stack<Enums.Action>(); // Stores the player's actions to allow for undoing
     private Stack<Enums.Color> colorStack = new Stack<Enums.Color>(); // Stores the player's color history to allow for undoing
     
-    private bool isInputDisabled;
     private Coroutine undoDelayCoroutine;
 
 
     private Enums.Color bumpColorSelect; // Which color (R,Y,B) was selected via a keyboard press?
     Enums.Color transferableColors; // Which colors (R,Y,B) can be transferred between player and object?
 
-    private SpriteRenderer[] PlayerSprite = new SpriteRenderer[2]; // 0 for slime body, 1 for expressions
+    private SpriteRenderer[] PlayerSprite = new SpriteRenderer[5]; // 0 for slime body, 1 for expressions, 2-4 for color picker
     private Animator PlayerAnimator;
 
     void Awake()
@@ -62,14 +63,26 @@ public class Player : MonoBehaviour
         SetColor(defaultColor, true);
         
         SetPlayerLocation(this.Pos, defaultFacing); // Update facing-direction of player on Sprite
+
+        UpdateAnimationSpeed();
     }
 
     void Update()
     {
-        if (isInputDisabled) return;
+        if (GameManager.Instance.GameMode == Enums.GameMode.NoInteraction) return;
 
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
         {
+            // Gameplay speed-up by holding shift. Useful for long undos.
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                GameManager.Instance.animationSpeed = GameManager.Instance.shiftSpeed;
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                GameManager.Instance.ResetAnimationSpeed();
+            }
+
             if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
             if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) this.Move(Enums.Action.East);
             if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) this.Move(Enums.Action.South);
@@ -80,21 +93,7 @@ public class Player : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.R))
             {
-                    this.FullReset();
-            }
-
-            // TEMPORARY COLOR-SWITCHING CODE
-            if (Input.GetKeyDown(KeyCode.Alpha4))
-            {
-                this.SetColor(Enums.Color.Orange, true);
-                actionStack.Push(Enums.Action.North);
-                actionStack.Push(Enums.Action.Bump);
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha5))
-            {
-                this.SetColor(Enums.Color.Violet, true);
-                actionStack.Push(Enums.Action.South);
-                actionStack.Push(Enums.Action.Bump);
+                FullReset();
             }
         }
 
@@ -110,7 +109,7 @@ public class Player : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.G) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
-                if (((transferableColors & Enums.Color.Red) == Enums.Color.None) || this.Color == Enums.Color.Yellow)
+                if (((transferableColors & Enums.Color.Yellow) == Enums.Color.None) || this.Color == Enums.Color.Yellow)
                 {
                     // Play Error sfx - can't select this color!
                 }
@@ -118,7 +117,7 @@ public class Player : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.B) || Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             {
-                if (((transferableColors & Enums.Color.Red) == Enums.Color.None) || this.Color == Enums.Color.Blue)
+                if (((transferableColors & Enums.Color.Blue) == Enums.Color.None) || this.Color == Enums.Color.Blue)
                 {
                     // Play Error sfx - can't select this color!
                 }
@@ -134,6 +133,7 @@ public class Player : MonoBehaviour
 
     private void Move(Enums.Action dir)
     {
+        UpdateAnimationSpeed();
         PlayerAnimator.ResetTrigger("Up");
         PlayerAnimator.ResetTrigger("Right");
         PlayerAnimator.ResetTrigger("Down");
@@ -209,7 +209,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator MoveAction(Enums.Action moveDir, Vector2 nextPos, GameObject pushableObject = null)
     {
-        isInputDisabled = true;
+        GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
 
         actionStack.Push(moveDir);
 
@@ -231,7 +231,7 @@ public class Player : MonoBehaviour
         }
         PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
         
-        isInputDisabled = false;
+        GameManager.Instance.GameMode = Enums.GameMode.Game;
     }
 
     private IEnumerator BumpAction(Enums.Action moveDir, Object bumpedObject)
@@ -246,8 +246,15 @@ public class Player : MonoBehaviour
             if (this.Color == Enums.Color.Red || this.Color == Enums.Color.Yellow || this.Color == Enums.Color.Blue) yield break;
         }
         
-        isInputDisabled = true;
-        GameManager.Instance.GameMode = Enums.GameMode.ColorSelect; // Keyboard controls selects color instead of moving
+        GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
+
+        // Hide the Sprites for invalid-colors
+        PlayerSprite[2].sprite = colorPickerSprite[0];
+        PlayerSprite[3].sprite = colorPickerSprite[0];
+        PlayerSprite[4].sprite = colorPickerSprite[0];
+        if (((transferableColors & Enums.Color.Red) != Enums.Color.None) && this.Color != Enums.Color.Red) PlayerSprite[2].sprite = colorPickerSprite[1];
+        if (((transferableColors & Enums.Color.Yellow) != Enums.Color.None) && this.Color != Enums.Color.Yellow) PlayerSprite[3].sprite = colorPickerSprite[1];
+        if (((transferableColors & Enums.Color.Blue) != Enums.Color.None) && this.Color != Enums.Color.Blue) PlayerSprite[4].sprite = colorPickerSprite[1];
 
         // Animate the showing of the color-picking UI
         PlayerAnimator.SetInteger("AnimationType", 3);
@@ -255,13 +262,13 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         PlayerAnimator.ResetTrigger("Down");
         
-        isInputDisabled = false;
+        GameManager.Instance.GameMode = Enums.GameMode.ColorSelect; // Keyboard controls selects color instead of moving
 
         Debug.Log("Waiting for player to choose a transferable color...");
 
         yield return new WaitUntil(() => ((transferableColors & bumpColorSelect) != Enums.Color.None) || transferableColors == (Enums.Color) (-1)); // Wait for the player to make a selection
         
-        isInputDisabled = true;
+        GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
 
         // Animate the hiding of the color-picking UI
         PlayerAnimator.SetInteger("AnimationType", 4);
@@ -310,7 +317,6 @@ public class Player : MonoBehaviour
         bumpColorSelect = Enums.Color.None;
         transferableColors = 0;
         GameManager.Instance.GameMode = Enums.GameMode.Game;
-        isInputDisabled = false;
     }
     
     private void Undo()
@@ -456,11 +462,19 @@ public class Player : MonoBehaviour
     {
         // Reset player position & facing
         actionStack.Clear();
+        PlayerAnimator.ResetTrigger("Up");
+        PlayerAnimator.ResetTrigger("Right");
+        PlayerAnimator.ResetTrigger("Down");
+        PlayerAnimator.ResetTrigger("Left");
+        PlayerAnimator.SetInteger("AnimationType", 0);
         SetPlayerLocation(defaultPos, defaultFacing);
         
         // Reset player color & add to colorStack
         colorStack.Clear();
         SetColor(defaultColor, true);
+
+        isDead = false;
+        GameManager.Instance.GameMode = Enums.GameMode.Game;
     }
 
     private string AnimTriggerName(Enums.Action dir)
@@ -478,5 +492,9 @@ public class Player : MonoBehaviour
             default:
                 return "";
         }
+    }
+    private void UpdateAnimationSpeed()
+    {
+        PlayerAnimator.speed = GameManager.Instance.animationSpeed;
     }
 }
