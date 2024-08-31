@@ -69,10 +69,10 @@ public class Object : MonoBehaviour
         }
         
         // Stop any previous animations
-        ObjectAnimator.SetBool("Move Up", false);
-        ObjectAnimator.SetBool("Move Right", false);
-        ObjectAnimator.SetBool("Move Down", false);
-        ObjectAnimator.SetBool("Move Left", false);
+        // ObjectAnimator.SetBool("Move Up", false);
+        // ObjectAnimator.SetBool("Move Right", false);
+        // ObjectAnimator.SetBool("Move Down", false);
+        // ObjectAnimator.SetBool("Move Left", false);
         StartCoroutine(MoveObjectCoroutine(nextDir));
     }
 
@@ -82,30 +82,30 @@ public class Object : MonoBehaviour
 
         if (isAnimated) // Incredibly inefficient animation code using booleans but oh well :D
         {
+            ObjectAnimator.ResetTrigger("Move Up");
+            ObjectAnimator.ResetTrigger("Move Right");
+            ObjectAnimator.ResetTrigger("Move Down");
+            ObjectAnimator.ResetTrigger("Move Left");
             ObjectAnimator.speed *= GameManager.Instance.pushSpeedMultiplier;
             if (moveDir == Vector2.up)
             {
-                ObjectAnimator.SetBool("Move Up", true);
+                ObjectAnimator.SetTrigger("Move Up");
                 yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
-                ObjectAnimator.SetBool("Move Up", false);
             }
             else if (moveDir == Vector2.right)
             {
-                ObjectAnimator.SetBool("Move Right", true);
+                ObjectAnimator.SetTrigger("Move Right");
                 yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
-                ObjectAnimator.SetBool("Move Right", false);
             }
             else if (moveDir == Vector2.down)
             {
-                ObjectAnimator.SetBool("Move Down", true);
+                ObjectAnimator.SetTrigger("Move Down");
                 yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
-                ObjectAnimator.SetBool("Move Down", false);
             }
             else if (moveDir == Vector2.left)
             {
-                ObjectAnimator.SetBool("Move Left", true);
+                ObjectAnimator.SetTrigger("Move Left");
                 yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
-                ObjectAnimator.SetBool("Move Left", false);
             }
             ObjectAnimator.speed /= GameManager.Instance.pushSpeedMultiplier;
         }
