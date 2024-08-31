@@ -3,18 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Enums
-{     
-     // public enum Color
-     // {
-     //      Blue = 0,
-     //      Violet = 1,
-     //      Red = 2,
-     //      Orange = 3,
-     //      Yellow = 4,
-     //      Green = 5,
-     //      Black = 6,
-     //      None = 7
-     // }
+{
      public enum Color
      {
           None = 0,                     // 0

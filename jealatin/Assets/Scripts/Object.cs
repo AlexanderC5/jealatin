@@ -5,6 +5,7 @@ using UnityEngine;
 public class Object : MonoBehaviour 
 {
     SpriteRenderer ObjectSprite;
+    Animator ObjectAnimator;
 
     [SerializeField] private Enums.Color defaultColor;
     private Vector2 defaultPos;
@@ -19,7 +20,8 @@ public class Object : MonoBehaviour
 
     void Awake()
     {
-        ObjectSprite = GetComponent<SpriteRenderer>();
+        ObjectSprite = GetComponentInChildren<SpriteRenderer>();
+        ObjectAnimator = GetComponentInChildren<Animator>();
         this.transform.position = new Vector3(Mathf.Round(this.transform.position.x), Mathf.Round(this.transform.position.y), 0);
         defaultPos = this.transform.position;
     }
@@ -27,6 +29,7 @@ public class Object : MonoBehaviour
     void Start()
     {
         SetColor(defaultColor, true, true);
+        UpdateAnimationSpeed();
     }
 
     void Update()
@@ -44,18 +47,6 @@ public class Object : MonoBehaviour
         if (addToColorStack) { colorStack.Push(color); }
 
         ObjectSprite.color = GameManager.Instance.Palette[color];
-    }
-
-    public bool CanBeColored()
-    {
-        if (color != (int) Enums.Color.Black) return true;
-        return false;
-    }
-
-    public bool CanGiveColor()
-    {
-        if (color != (int) Enums.Color.None) return true;
-        return false;
     }
 
     public void MoveObject(Enums.Action moveDir)
@@ -76,18 +67,53 @@ public class Object : MonoBehaviour
                 nextDir = Vector2.left;
                 break;
         }
+        
+        // Stop any previous animations
+        ObjectAnimator.SetBool("Move Up", false);
+        ObjectAnimator.SetBool("Move Right", false);
+        ObjectAnimator.SetBool("Move Down", false);
+        ObjectAnimator.SetBool("Move Left", false);
         StartCoroutine(MoveObjectCoroutine(nextDir));
     }
 
-    IEnumerator MoveObjectCoroutine(Vector2 moveDir)
+    IEnumerator MoveObjectCoroutine(Vector2 moveDir, bool isAnimated = true)
     {
         this.transform.position += (Vector3) moveDir;
-        yield return new WaitForSeconds(0.2f);
+
+        if (isAnimated) // Incredibly inefficient animation code using booleans but oh well :D
+        {
+            ObjectAnimator.speed *= GameManager.Instance.pushSpeedMultiplier;
+            if (moveDir == Vector2.up)
+            {
+                ObjectAnimator.SetBool("Move Up", true);
+                yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
+                ObjectAnimator.SetBool("Move Up", false);
+            }
+            else if (moveDir == Vector2.right)
+            {
+                ObjectAnimator.SetBool("Move Right", true);
+                yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
+                ObjectAnimator.SetBool("Move Right", false);
+            }
+            else if (moveDir == Vector2.down)
+            {
+                ObjectAnimator.SetBool("Move Down", true);
+                yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
+                ObjectAnimator.SetBool("Move Down", false);
+            }
+            else if (moveDir == Vector2.left)
+            {
+                ObjectAnimator.SetBool("Move Left", true);
+                yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
+                ObjectAnimator.SetBool("Move Left", false);
+            }
+            ObjectAnimator.speed /= GameManager.Instance.pushSpeedMultiplier;
+        }
     }
 
     public void UndoMove(Vector2 dirMoved)
     {
-        StartCoroutine(MoveObjectCoroutine(-dirMoved));
+        StartCoroutine(MoveObjectCoroutine(-dirMoved, false));
     }
     
     public void UndoColor()
@@ -97,10 +123,9 @@ public class Object : MonoBehaviour
     }
 
     public void ResetObjectLocation()
-        {
-            transform.position = defaultPos;
-            // TODO: Update facing direction
-        }
+    {
+        transform.position = defaultPos;
+    }
 
     private void FullReset() // When 'R' key pressed. Cannot be undone
     {
@@ -110,5 +135,10 @@ public class Object : MonoBehaviour
         // Reset object color & add to colorStack
         colorStack.Clear();
         SetColor(defaultColor, true, true);
+    }
+
+    private void UpdateAnimationSpeed()
+    {
+        ObjectAnimator.speed = GameManager.Instance.animationSpeed;
     }
 }

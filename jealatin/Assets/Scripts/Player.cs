@@ -214,13 +214,16 @@ public class Player : MonoBehaviour
         {
             pushableObject.GetComponent<Object>().MoveObject(moveDir);
             actionStack.Push(Enums.Action.Push);
+
+            yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed / GameManager.Instance.pushSpeedMultiplier);
+        }
+        else // No pushable object
+        {
+            yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         }
 
         // TODO: Aniamte
         
-        Debug.Log(actionStack.Count + " actions taken");
-
-        yield return new WaitForSeconds(0.2f * GameManager.Instance.animationSpeed);
         isInputDisabled = false;
     }
 
@@ -241,7 +244,7 @@ public class Player : MonoBehaviour
 
         // TODO: Animate the UI displaying
 
-        yield return new WaitForSeconds(0.2f * GameManager.Instance.animationSpeed);
+        yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         
         isInputDisabled = false;
 
@@ -267,7 +270,7 @@ public class Player : MonoBehaviour
 
         isInputDisabled = true;
 
-        yield return new WaitForSeconds(0.2f * GameManager.Instance.animationSpeed);
+        yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
 
         // TODO: Animate the slime consuming the object and changing colors
 
@@ -365,7 +368,7 @@ public class Player : MonoBehaviour
 
     IEnumerator UndoDelay()
     {
-        yield return new WaitForSeconds(0.2f * GameManager.Instance.animationSpeed);
+        yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         undoDelayCoroutine = null;
     }
 
