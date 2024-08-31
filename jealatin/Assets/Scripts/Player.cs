@@ -12,7 +12,7 @@ using Vector2 = UnityEngine.Vector2;
 public class Player : MonoBehaviour
 {   
     [SerializeField] private Vector2 defaultPos;
-    [SerializeField] private Enums.Action defaultFacing;
+    [SerializeField] private Enums.Action defaultFacing = Enums.Action.South;
     [SerializeField] private Enums.Color defaultColor;
 
 #region Properties
@@ -177,8 +177,6 @@ public class Player : MonoBehaviour
             return;
         }
 
-        // TODO: Animation for 'Enums.Touch.Pushable'
-
         StartCoroutine(MoveAction(dir, nextPos));
     }
 
@@ -215,7 +213,6 @@ public class Player : MonoBehaviour
 
         actionStack.Push(moveDir);
 
-        Debug.Log("Move in this dir: " + nextPos.x + " | " + nextPos.y);
         SetPlayerLocation((Vector2) this.transform.position + nextPos, moveDir);
         
         PlayerAnimator.SetInteger("AnimationType", 1); // 1 = movement-type animation
@@ -252,9 +249,11 @@ public class Player : MonoBehaviour
         isInputDisabled = true;
         GameManager.Instance.GameMode = Enums.GameMode.ColorSelect; // Keyboard controls selects color instead of moving
 
-        // TODO: Animate the UI displaying
-
+        // Animate the showing of the color-picking UI
+        PlayerAnimator.SetInteger("AnimationType", 3);
+        PlayerAnimator.SetTrigger("Down");
         yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
+        PlayerAnimator.ResetTrigger("Down");
         
         isInputDisabled = false;
 
@@ -264,9 +263,11 @@ public class Player : MonoBehaviour
         
         isInputDisabled = true;
 
-        // TODO: Animate the UI hiding
-
-        yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
+        // Animate the hiding of the color-picking UI
+        PlayerAnimator.SetInteger("AnimationType", 4);
+        PlayerAnimator.SetTrigger("Down");
+        yield return new WaitForSeconds(0.1f / GameManager.Instance.animationSpeed);
+        PlayerAnimator.ResetTrigger("Down");
 
         if (transferableColors != (Enums.Color) (-1)) // If color-transfer was not cancelled:
         {
@@ -275,7 +276,7 @@ public class Player : MonoBehaviour
 
             // bumpedObject.SetColor((Enums.Color) bumpedObject.Color ^ bumpColorSelect, true, true);
 
-            PlayerAnimator.SetInteger("AnimationType", 2); // 1 = bump-type animation
+            PlayerAnimator.SetInteger("AnimationType", 2); // 2 = bump-type animation
             PlayerAnimator.SetTrigger(AnimTriggerName(moveDir));
 
             Enums.Color oldPlayerColor = this.Color; // Store the color of the player pre-transfer
@@ -387,11 +388,10 @@ public class Player : MonoBehaviour
                 hit.transform.gameObject.GetComponent<Object>().UndoMove(dirMoved);
             }
 
-            this.Pos = this.Pos - dirMoved; // Undo Player move action
+            this.Pos -= dirMoved; // Undo Player move action
         }
 
-        this.Facing = lastFacingDir; // Update the player's facing from the action taken two-turns ago
-        SetPlayerLocation();
+        SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
 
         // Start Undo-Cooldown Coroutine for holding z
         if (undoDelayCoroutine != null) StopCoroutine("UndoDelay"); // Refresh the undo-cooldown timer
@@ -424,13 +424,32 @@ public class Player : MonoBehaviour
     public void SetPlayerLocation(Vector2 position, Enums.Action facing = Enums.Action.None)
     {
         this.Pos = position;
-        if (facing != Enums.Action.None) this.Facing = facing;
-        SetPlayerLocation();
-    }
-    public void SetPlayerLocation()
-    {
         transform.position = this.Pos;
-        // TODO: Update facing direction
+
+        if (facing != Enums.Action.None) this.Facing = facing;
+        
+        PlayerAnimator.ResetTrigger("Up");
+        PlayerAnimator.ResetTrigger("Right");
+        PlayerAnimator.ResetTrigger("Down");
+        PlayerAnimator.ResetTrigger("Left");
+
+        PlayerAnimator.SetInteger("AnimationType", 0); // 0 = idle animation
+        switch (facing)
+        {
+            case Enums.Action.North:
+                PlayerAnimator.SetTrigger("Up");
+                break;
+            case Enums.Action.East:
+                PlayerAnimator.SetTrigger("Right");
+                break;
+            case Enums.Action.South:
+            default:
+                PlayerAnimator.SetTrigger("Down");
+                break;
+            case Enums.Action.West:
+                PlayerAnimator.SetTrigger("Left");
+                break;
+        }
     }
 
     public void FullReset() // When 'R' key pressed. Cannot be undone
