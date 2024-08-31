@@ -15,7 +15,6 @@ public class StageManager : MonoBehaviour
 
     void Start()
     {
-        player.ResetActionStack();
-        player.ResetColorStack();
+        player.FullReset();
     }
 }
