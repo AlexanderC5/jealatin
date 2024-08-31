@@ -25,6 +25,7 @@ private float defaultAnimationSpeed;
     public float animationSpeed = 1f;
     public float shiftSpeed = 2f;
     public float pushSpeedMultiplier = 0.75f;
+    public float bumpSpeedMultiplier = 0.5f;
 
     void Awake()
     {

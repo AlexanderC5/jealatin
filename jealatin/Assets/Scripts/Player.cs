@@ -76,7 +76,7 @@ public class Player : MonoBehaviour
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
         {
             // Gameplay speed-up by holding shift. Useful for long undos.
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 GameManager.Instance.animationSpeed = GameManager.Instance.shiftSpeed;
             }
@@ -308,13 +308,14 @@ public class Player : MonoBehaviour
 
             for (float f = 0.05f; f <= 1f; f += 0.05f) // Lerp all relevant colors
             {
-                yield return new WaitForSeconds(0.2f / 20 / GameManager.Instance.animationSpeed);
+                yield return new WaitForSeconds(0.2f / 20 / GameManager.Instance.animationSpeed / GameManager.Instance.bumpSpeedMultiplier);
                 this.SetLerpColor(oldPlayerColor, this.Color, f);
                 bumpedObject.SetLerpColor(oldBumpedColor, bumpedObject.Color, f);
                 if ((int)oldConsumedColor != -1)
                 {
                     hit0.transform.gameObject.GetComponent<Object>().SetLerpColor(oldConsumedColor, this.Color, f);
                 }
+                if (f > 0.5f) UpdateExpression(); // Update expression halfway through bump
             }
             PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
         
@@ -419,13 +420,13 @@ public class Player : MonoBehaviour
     public void SetColor(Enums.Color color, bool addToColorStack, bool updateColor = true)
     {   
         Color = color; // Set this to false if lerping with the function directly below
-        UpdateExpression();
 
         if (addToColorStack) { colorStack.Push(color); }
 
         if (updateColor)
         {
             PlayerSprite[0].color = GameManager.Instance.Palette[color];
+            UpdateExpression();
         }
     }
 

@@ -1631,6 +1631,7 @@ MonoBehaviour:
   animationSpeed: 1
   shiftSpeed: 2
   pushSpeedMultiplier: 0.75
+  bumpSpeedMultiplier: 0.5
 --- !u!4 &1346141945
 Transform:
   m_ObjectHideFlags: 0
@@ -2236,7 +2237,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 1.0003257}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
