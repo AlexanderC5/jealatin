@@ -141,7 +141,7 @@ public class Player : MonoBehaviour
                 else bumpColorSelect = Enums.Color.Blue;
             }
             
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.DownArrow)) // Cancel the bump action
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) // Cancel the bump action
             {
                 transferableColors = (Enums.Color) (-1);
             }
