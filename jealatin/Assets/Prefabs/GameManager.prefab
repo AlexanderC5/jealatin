@@ -448,6 +448,10 @@ MonoBehaviour:
   shiftSpeed: 2
   pushSpeedMultiplier: 0.75
   bumpSpeedMultiplier: 0.5
+  sfx:
+  - {fileID: 8300000, guid: 567d679c2721e4349a43e14d8f2d08ca, type: 3}
+  - {fileID: 8300000, guid: e815493a965a4c3489d53ea241f8f72f, type: 3}
+  - {fileID: 8300000, guid: 496d17e084db8944cbcc28ee9a9fc974, type: 3}
 --- !u!95 &3738127219637484311
 Animator:
   serializedVersion: 5

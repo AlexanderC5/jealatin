@@ -39,6 +39,8 @@ public class IntroCutscene : MonoBehaviour
     {
         if (isAnimating) return;
 
+        GameManager.Instance.PlaySound("move_sfx");
+
         currentSlide++;
         if (currentSlide >= imageSlides.Length)
         {

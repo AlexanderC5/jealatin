@@ -27,12 +27,15 @@ public class GameManager : MonoBehaviour
     public BoundsInt StageSize  { get => stageSize; set => stageSize = value; }
 
     private float defaultAnimationSpeed;
+    private float defaultSoundPitch;
     public float animationSpeed = 1f;
     public float shiftSpeed = 2f;
     public float pushSpeedMultiplier = 0.75f;
     public float bumpSpeedMultiplier = 0.5f;
 
-    
+    [SerializeField] private AudioClip[] sfx;
+    private AudioSource sound;
+
     private Animator MainAnimator;
 
     void Awake()
@@ -42,9 +45,11 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             defaultAnimationSpeed = animationSpeed;
+            defaultSoundPitch = animationSpeed;
             DontDestroyOnLoad(this.gameObject);
 
             MainAnimator = GetComponentInChildren<Animator>();
+            sound = GetComponentInChildren<AudioSource>();
             GameMode = Enums.GameMode.MainMenu;
 
             // Change blendStyleIndex so an error doesn't pop up for the first frame when there
@@ -135,5 +140,28 @@ public class GameManager : MonoBehaviour
         MainAnimator.SetTrigger("Trigger");
         yield return new WaitForSeconds(0.666f / animationSpeed);
         MainAnimator.ResetTrigger("Trigger");
+    }
+
+    public void PlaySound(int clipID)
+    {
+        sound.Stop();
+        sound.pitch = animationSpeed; // Speed up clip if game is sped up
+        sound.clip = sfx[clipID];
+        Debug.Log("Sfx " + clipID + " Played!");
+        sound.Play();
+    }
+    public void PlaySound(string sfxName)
+    {
+        int sfxID = 0;
+        foreach (var c in sfx)
+        {
+            if (c.name == sfxName)
+            {
+                break;
+            }
+            else sfxID++;
+        }
+        if (sfxID >= sfx.Length) Debug.Log("Sound " + sfxID + " does not exist!");
+        PlaySound(sfxID);
     }
 }

@@ -1733,6 +1733,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: sfx.Array.data[0]
+      value: 
+      objectReference: {fileID: 8300000, guid: 567d679c2721e4349a43e14d8f2d08ca, type: 3}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: sfx.Array.data[1]
+      value: 
+      objectReference: {fileID: 8300000, guid: e815493a965a4c3489d53ea241f8f72f, type: 3}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: sfx.Array.data[2]
+      value: 
+      objectReference: {fileID: 8300000, guid: 496d17e084db8944cbcc28ee9a9fc974, type: 3}
     - target: {fileID: 4501320115438130207, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1771,6 +1783,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4501320115438130207, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5076025993093913502, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: m_PlayOnAwake
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8034708616903102839, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}

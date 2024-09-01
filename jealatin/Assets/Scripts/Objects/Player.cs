@@ -196,24 +196,31 @@ public class Player : MonoBehaviour
     public Enums.Touch CheckCollision(Vector2 dir, ref GameObject bumpedObject)
     {
         //RaycastHit2D hit1 = Physics2D.Raycast(this.transform.position + (Vector3) dir, dir, 0.1f); // Send out a raycast to check ONE tile ahead of this sprite
-        RaycastHit2D hit2 = Physics2D.Raycast(this.transform.position + (Vector3) dir * 2, dir, 0.1f); // Send out a raycast to check TWO tiles ahead of this sprite
+        //RaycastHit2D hit2 = Physics2D.Raycast(this.transform.position + (Vector3) dir * 2, dir, 0.1f); // Send out a raycast to check TWO tiles ahead of this sprite
 
         Collider2D hit1 = Physics2D.OverlapPoint((Vector2) this.transform.position + dir);
+        Collider2D hit2 = Physics2D.OverlapPoint((Vector2) this.transform.position + dir * 2);
         //TilemapCollider2D hit1t = 
 
         //if (hit1.collider == null) { Debug.Log("No collider detected"); return Enums.Touch.None; }
-        if (hit1 == null) return Enums.Touch.None;
+        if (hit1 == null)
+        {
+            GameManager.Instance.PlaySound("move_sfx");
+            return Enums.Touch.None;
+        }
 
         bumpedObject = hit1.transform.gameObject; // Store the bumped object
 
         if (bumpedObject.gameObject.tag == "Object") // If the 1-tile raycast finds an object with the "Object" tag
         {
-            if (hit2.collider == null) // If there's a collider in the tile behind the bumped object
+            if (hit2 == null) // If there's a collider in the tile behind the bumped object
             {
+                GameManager.Instance.PlaySound("move_sfx");
                 return Enums.Touch.Pushable;
             }
             if (this.Color == bumpedObject.GetComponent<Object>().Color) // If the bumped object is the same color as the player
             {
+                GameManager.Instance.PlaySound("consume_sfx");
                 return Enums.Touch.Consume;
             }
             return Enums.Touch.ColorChange;
@@ -291,6 +298,8 @@ public class Player : MonoBehaviour
         
         GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
 
+        if (transferableColors != (Enums.Color) (-1)) GameManager.Instance.PlaySound("bump_sfx");
+
         // Animate the hiding of the color-picking UI
         PlayerAnimator.SetInteger("AnimationType", 4);
         PlayerAnimator.SetTrigger("Down");
@@ -314,8 +323,8 @@ public class Player : MonoBehaviour
             bumpedObject.SetColor(bumpedObject.Color ^ bumpColorSelect, true, false);
 
             Enums.Color oldConsumedColor = (Enums.Color) (-1);
-            RaycastHit2D hit0 = Physics2D.Raycast(this.transform.position, Vector2.up, 0.1f); // Send out a raycast to check the current tile
-            if (hit0.collider != null) // If the player is currently on top of another object (the object has the same color)
+            Collider2D hit0 = Physics2D.OverlapPoint((Vector2) this.transform.position);
+            if (hit0 != null) // If the player is currently on top of another object (the object has the same color)
             {
                 oldConsumedColor = hit0.transform.gameObject.GetComponent<Object>().Color;
                 hit0.transform.gameObject.GetComponent<Object>().SetColor( this.Color, true, false);

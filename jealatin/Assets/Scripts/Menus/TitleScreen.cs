@@ -63,6 +63,8 @@ public class TitleScreen : MonoBehaviour
         if (navVector == Vector2.zero) return; /// No input detected
         inputDelayCoroutine = StartCoroutine(InputDelay());
 
+        GameManager.Instance.PlaySound("move_sfx");
+
         // if (navVector == Vector2.left || navVector.x == -2) // Highlight exit
         // {
         //     HighlightMenuOption(MenuButtons.Length - 1); // Select exit
@@ -124,6 +126,8 @@ public class TitleScreen : MonoBehaviour
     private void SelectLevel()
     {
         if (navVector == Vector2.zero) return; /// No input detected
+
+        GameManager.Instance.PlaySound("move_sfx");
         
         if (navVector.x == -2) // Exit level select
         {
