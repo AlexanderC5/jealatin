@@ -1,19 +1,14 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-//using System.Numerics;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
-using Vector2 = UnityEngine.Vector2;
 
 public class Player : MonoBehaviour
 {   
     [SerializeField] private Vector2 defaultPos;
     [SerializeField] private Enums.Action defaultFacing = Enums.Action.South;
     [SerializeField] private Enums.Color defaultColor;
+
+    [SerializeField] private bool isDeadIfGreen = true;
 
     [SerializeField] private Sprite[] colorPickerSprite = new Sprite[2];
     [SerializeField] private Sprite[] expressionsSprites = new Sprite[15];
@@ -64,6 +59,7 @@ public class Player : MonoBehaviour
         SetColor(defaultColor, true);
         
         SetPlayerLocation(this.Pos, defaultFacing); // Update facing-direction of player on Sprite
+        isDead = false;
 
         UpdateAnimationSpeed();
         UpdateExpression();
@@ -71,6 +67,13 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (isDeadIfGreen && !isDead && this.Color == Enums.Color.Green) // Play the death animation if player touches green
+        {
+            isDead = true;
+
+            DeathAnimation();
+        }
+
         if (GameManager.Instance.GameMode == Enums.GameMode.NoInteraction) return;
 
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
@@ -85,13 +88,15 @@ public class Player : MonoBehaviour
                 GameManager.Instance.ResetAnimationSpeed();
             }
 
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) this.Move(Enums.Action.East);
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) this.Move(Enums.Action.South);
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) this.Move(Enums.Action.West);
-
-            if (Input.GetKeyDown(KeyCode.Z)) this.Undo();
-            else if (Input.GetKey(KeyCode.Z) && undoDelayCoroutine == null) this.Undo(); // For holding z
+            if (!isDead) // Can only move if the player is not dead
+            {
+                if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
+                if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) this.Move(Enums.Action.East);
+                if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) this.Move(Enums.Action.South);
+                if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) this.Move(Enums.Action.West);
+            }
+            if (Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Backspace)) this.Undo();
+            else if (undoDelayCoroutine == null && (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.Backspace))) this.Undo(); // For holding z
 
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -126,7 +131,7 @@ public class Player : MonoBehaviour
                 else bumpColorSelect = Enums.Color.Blue;
             }
             
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Z)) // Cancel the bump action
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.DownArrow)) // Cancel the bump action
             {
                 transferableColors = (Enums.Color) (-1);
             }
@@ -320,6 +325,10 @@ public class Player : MonoBehaviour
             PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
         
         }
+        else // Add some delay when cancelling so the player doesn't immediately move
+        {
+            yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
+        }
 
         bumpColorSelect = Enums.Color.None;
         transferableColors = 0;
@@ -405,6 +414,7 @@ public class Player : MonoBehaviour
         }
 
         SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
+        isDead = false; // Player is no longer deada if the undo removes the death
 
         // Start Undo-Cooldown Coroutine for holding z
         if (undoDelayCoroutine != null) StopCoroutine("UndoDelay"); // Refresh the undo-cooldown timer
@@ -524,5 +534,23 @@ public class Player : MonoBehaviour
         }
         
         PlayerSprite[1].sprite = expressionsSprites[spriteIndex];
+    }
+
+    private void DeathAnimation()
+    {
+        if (PlayerAnimator.GetInteger("AnimationType") != 0) return; // Only play the animation from the idle state (to not mess up bool vars)
+
+        StartCoroutine(DeathAnimationCoroutine());
+    }
+
+    IEnumerator DeathAnimationCoroutine()
+    {
+        PlayerAnimator.SetInteger("AnimationType", 5); // 5 = death animation
+        PlayerAnimator.SetTrigger("Down"); // trigger the start of the animation
+        yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed); // boom
+        PlayerAnimator.ResetTrigger("Down");
+
+        Debug.Log("Player is dead - Press z to Undo or r to Restart!");
+        // TODO: Call UI -> Tell player to Undo
     }
 }
