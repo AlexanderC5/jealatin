@@ -41,7 +41,7 @@ public class TitleScreen : MonoBehaviour
 
     void Update()
     {
-        if (inputBlocked) return;            
+        if (inputBlocked) return;
 
         // Set the navigation vector
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) navVector = Vector2.up;

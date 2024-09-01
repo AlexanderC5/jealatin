@@ -96,7 +96,6 @@ public class Player : MonoBehaviour
 
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
         {
-            Debug.Log("Game Running & Taking Inputs");
             if (!IsDead) // Can only move if the player is not dead
             {
                 if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
@@ -351,7 +350,7 @@ public class Player : MonoBehaviour
         if (actionStack.Count == 0) return; // Make sure the undo-stack is not empty
 
         Enums.Action lastAction = actionStack.Pop();
-        Debug.Log("Undo #" + actionStack.Count + ": " + lastAction);
+        // Debug.Log("Undo #" + actionStack.Count + ": " + lastAction);
 
         bool isLastActionBump = false;
         bool isLastActionPush = false;
