@@ -91,11 +91,11 @@ public class GameManager : MonoBehaviour
         MainAnimator.speed = GameManager.Instance.animationSpeed;
     }
 
-    public void LoadNextScene(bool fade = false)
+    public void LoadNextScene(bool fade = true)
     {
         int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
 
-        if (nextScene > SceneManager.sceneCount) // Reached the end of the levels -> go to level select
+        if (nextScene >= SceneManager.sceneCountInBuildSettings) // Reached the end of the levels -> go to level select
         {
             if (GameMode == Enums.GameMode.LevelClear) GameMode = Enums.GameMode.LevelSelect;
             else GameMode = Enums.GameMode.MainMenu;

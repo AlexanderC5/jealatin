@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     private bool isDead;
     public bool IsDead { get => isDead; set => isDead = value; }
     private bool isWin;
-    public bool IsWin { get => isDead; set => isDead = value; }
+    public bool IsWin { get => isWin; set => isWin = value; }
 #endregion Properties
 
     private Stack<Enums.Action> actionStack = new Stack<Enums.Action>(); // Stores the player's actions to allow for undoing
@@ -73,10 +73,11 @@ public class Player : MonoBehaviour
         if (IsWin) return; // Without this, LoadNextScene() will be called every frame
         if (isDeadIfGreen && !IsDead && this.Color == Enums.Color.Green) // Play the death animation if player touches green
         {
-            isDead = true;
+            IsDead = true;
 
             DeathAnimation();
         }
+
 
         // Player wins if they are out of bounds
         if ((this.Pos.y > GameManager.Instance.StageSize.yMax)
@@ -95,7 +96,8 @@ public class Player : MonoBehaviour
 
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
         {
-            if (!isDead) // Can only move if the player is not dead
+            Debug.Log("Game Running & Taking Inputs");
+            if (!IsDead) // Can only move if the player is not dead
             {
                 if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
                 if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) this.Move(Enums.Action.East);
@@ -422,7 +424,7 @@ public class Player : MonoBehaviour
 
         SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
         PlayerAnimator.SetInteger("AnimationType", 0); // 0 = idle-type animation
-        isDead = false; // Player is no longer deada if the undo removes the death
+        IsDead = false; // Player is no longer deada if the undo removes the death
 
         // Start Undo-Cooldown Coroutine for holding z
         if (undoDelayCoroutine != null) StopCoroutine("UndoDelay"); // Refresh the undo-cooldown timer
@@ -500,7 +502,8 @@ public class Player : MonoBehaviour
         SetColor(defaultColor, true);
 
         UpdateExpression();
-        isDead = false;
+        IsDead = false;
+        IsWin = false;
         GameManager.Instance.GameMode = Enums.GameMode.Game;
     }
 
@@ -559,7 +562,7 @@ public class Player : MonoBehaviour
         PlayerAnimator.ResetTrigger("Down");
 
         Debug.Log("Player is dead - Press z to Undo or r to Restart!");
-        
+
         // TODO: Call UI -> Tell player to Undo
     }
 }
