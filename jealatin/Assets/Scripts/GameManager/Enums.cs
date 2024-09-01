@@ -36,7 +36,8 @@ public static class Enums
           LevelClear = 3, // Win condition = escape the current screen
           MainMenu = 4,
           LevelSelect = 5,
-          PauseMenu = 6
+          PauseMenu = 6,
+          Cutscene = 7
 
      }
 

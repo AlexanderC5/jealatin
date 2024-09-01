@@ -26,6 +26,8 @@ public class Player : MonoBehaviour
     }
     private bool isDead;
     public bool IsDead { get => isDead; set => isDead = value; }
+    private bool isWin;
+    public bool IsWin { get => isDead; set => isDead = value; }
 #endregion Properties
 
     private Stack<Enums.Action> actionStack = new Stack<Enums.Action>(); // Stores the player's actions to allow for undoing
@@ -59,7 +61,8 @@ public class Player : MonoBehaviour
         SetColor(defaultColor, true);
         
         this.FullReset();
-        isDead = false;
+        IsDead = false;
+        IsWin = false;
 
         UpdateAnimationSpeed();
         UpdateExpression();
@@ -67,7 +70,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (isDeadIfGreen && !isDead && this.Color == Enums.Color.Green) // Play the death animation if player touches green
+        if (IsWin) return; // Without this, LoadNextScene() will be called every frame
+        if (isDeadIfGreen && !IsDead && this.Color == Enums.Color.Green) // Play the death animation if player touches green
         {
             isDead = true;
 
@@ -80,24 +84,17 @@ public class Player : MonoBehaviour
          || (this.Pos.y < GameManager.Instance.StageSize.yMin)
          || (this.Pos.x < GameManager.Instance.StageSize.xMin))
         {
+            StopAllCoroutines();
+            IsWin = true;
             GameManager.Instance.GameMode = Enums.GameMode.LevelClear;
-            Debug.Log("Congrats on clearing the level!");
+            Debug.Log("Level cleared!");
+            GameManager.Instance.LoadNextScene();
         }
 
         if (GameManager.Instance.GameMode == Enums.GameMode.NoInteraction) return;
 
         if (GameManager.Instance.GameMode == Enums.GameMode.Game) // Movement and Undo controls
         {
-            // Gameplay speed-up by holding shift. Useful for long undos.
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-            {
-                GameManager.Instance.animationSpeed = GameManager.Instance.shiftSpeed;
-            }
-            else if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                GameManager.Instance.ResetAnimationSpeed();
-            }
-
             if (!isDead) // Can only move if the player is not dead
             {
                 if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) this.Move(Enums.Action.North);
