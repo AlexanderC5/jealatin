@@ -3,18 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Enums
-{     
-     // public enum Color
-     // {
-     //      Blue = 0,
-     //      Violet = 1,
-     //      Red = 2,
-     //      Orange = 3,
-     //      Yellow = 4,
-     //      Green = 5,
-     //      Black = 6,
-     //      None = 7
-     // }
+{
      public enum Color
      {
           None = 0,                     // 0
@@ -42,9 +31,11 @@ public static class Enums
      public enum GameMode
      {
           Game = 0,
-          ColorSelect = 1,
-          MainMenu = 2,
-          PauseMenu = 3
+          NoInteraction = 1, // For animations & other things that do not accept keypresses
+          ColorSelect = 2,
+          LevelClear = 3, // Win condition = escape the current screen
+          MainMenu = 4,
+          PauseMenu = 5
 
      }
 
