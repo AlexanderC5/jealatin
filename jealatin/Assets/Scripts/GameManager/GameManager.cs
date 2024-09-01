@@ -21,7 +21,10 @@ public class GameManager : MonoBehaviour
     private Enums.GameMode gameMode;
     public Enums.GameMode GameMode { get => gameMode; set => gameMode = value; }
 
-private float defaultAnimationSpeed;
+    private BoundsInt stageSize = new BoundsInt(); // Automatically resize the camera. Defined from StageManager, used by CameraPosition
+    public BoundsInt StageSize  { get => stageSize; set => stageSize = value; }
+
+    private float defaultAnimationSpeed;
     public float animationSpeed = 1f;
     public float shiftSpeed = 2f;
     public float pushSpeedMultiplier = 0.75f;

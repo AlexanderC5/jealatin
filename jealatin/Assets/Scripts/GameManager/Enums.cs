@@ -33,8 +33,9 @@ public static class Enums
           Game = 0,
           NoInteraction = 1, // For animations & other things that do not accept keypresses
           ColorSelect = 2,
-          MainMenu = 3,
-          PauseMenu = 4
+          LevelClear = 3, // Win condition = escape the current screen
+          MainMenu = 4,
+          PauseMenu = 5
 
      }
 

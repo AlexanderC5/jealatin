@@ -58,7 +58,7 @@ public class Player : MonoBehaviour
         }
         SetColor(defaultColor, true);
         
-        SetPlayerLocation(this.Pos, defaultFacing); // Update facing-direction of player on Sprite
+        this.FullReset();
         isDead = false;
 
         UpdateAnimationSpeed();
@@ -72,6 +72,16 @@ public class Player : MonoBehaviour
             isDead = true;
 
             DeathAnimation();
+        }
+
+        // Player wins if they are out of bounds
+        if ((this.Pos.y > GameManager.Instance.StageSize.yMax)
+         || (this.Pos.x > GameManager.Instance.StageSize.xMax)
+         || (this.Pos.y < GameManager.Instance.StageSize.yMin)
+         || (this.Pos.x < GameManager.Instance.StageSize.xMin))
+        {
+            GameManager.Instance.GameMode = Enums.GameMode.LevelClear;
+            Debug.Log("Congrats on clearing the level!");
         }
 
         if (GameManager.Instance.GameMode == Enums.GameMode.NoInteraction) return;
@@ -176,8 +186,6 @@ public class Player : MonoBehaviour
             return;
         }
 
-        // TODO: Animation for 'Enums.Touch.Consume'
-
         if (moveCollision == Enums.Touch.Pushable) // Found a pushable object, push
         {
             StartCoroutine(MoveAction(dir, nextPos, bumpedObject));
@@ -189,10 +197,14 @@ public class Player : MonoBehaviour
 
     public Enums.Touch CheckCollision(Vector2 dir, ref GameObject bumpedObject)
     {
-        RaycastHit2D hit1 = Physics2D.Raycast(this.transform.position + (Vector3) dir, dir, 0.1f); // Send out a raycast to check ONE tile ahead of this sprite
+        //RaycastHit2D hit1 = Physics2D.Raycast(this.transform.position + (Vector3) dir, dir, 0.1f); // Send out a raycast to check ONE tile ahead of this sprite
         RaycastHit2D hit2 = Physics2D.Raycast(this.transform.position + (Vector3) dir * 2, dir, 0.1f); // Send out a raycast to check TWO tiles ahead of this sprite
 
-        if (hit1.collider == null) return Enums.Touch.None;
+        Collider2D hit1 = Physics2D.OverlapPoint((Vector2) this.transform.position + dir);
+        //TilemapCollider2D hit1t = 
+
+        //if (hit1.collider == null) { Debug.Log("No collider detected"); return Enums.Touch.None; }
+        if (hit1 == null) return Enums.Touch.None;
 
         bumpedObject = hit1.transform.gameObject; // Store the bumped object
 
@@ -237,7 +249,7 @@ public class Player : MonoBehaviour
         {
             yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed);
         }
-        PlayerAnimator.SetInteger("AnimationType", 0); // = idle-type animation
+        PlayerAnimator.SetInteger("AnimationType", 0); // 0 = idle-type animation
         
         GameManager.Instance.GameMode = Enums.GameMode.Game;
     }
@@ -348,13 +360,11 @@ public class Player : MonoBehaviour
         {
             isLastActionBump = true;
             lastAction = actionStack.Pop();
-            Debug.Log("Undo #" + actionStack.Count + ": " + lastAction);
         }
         else if (lastAction == Enums.Action.Push) // Check for a bump or push
         {
             isLastActionPush = true;
             lastAction = actionStack.Pop();
-            Debug.Log("Undo #" + actionStack.Count + ": " + lastAction);
         }
         
         Enums.Action lastFacingDir = Enums.Action.None; // Check 2+ moves ago for the player direction
@@ -414,6 +424,7 @@ public class Player : MonoBehaviour
         }
 
         SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
+        PlayerAnimator.SetInteger("AnimationType", 0); // 0 = idle-type animation
         isDead = false; // Player is no longer deada if the undo removes the death
 
         // Start Undo-Cooldown Coroutine for holding z
@@ -538,19 +549,20 @@ public class Player : MonoBehaviour
 
     private void DeathAnimation()
     {
-        if (PlayerAnimator.GetInteger("AnimationType") != 0) return; // Only play the animation from the idle state (to not mess up bool vars)
-
         StartCoroutine(DeathAnimationCoroutine());
     }
 
     IEnumerator DeathAnimationCoroutine()
     {
+        yield return new WaitUntil(() => PlayerAnimator.GetInteger("AnimationType") == 0); // Only play the animation from the idle state (to not mess up bool vars)
+
         PlayerAnimator.SetInteger("AnimationType", 5); // 5 = death animation
         PlayerAnimator.SetTrigger("Down"); // trigger the start of the animation
         yield return new WaitForSeconds(0.2f / GameManager.Instance.animationSpeed); // boom
         PlayerAnimator.ResetTrigger("Down");
 
         Debug.Log("Player is dead - Press z to Undo or r to Restart!");
+        
         // TODO: Call UI -> Tell player to Undo
     }
 }
