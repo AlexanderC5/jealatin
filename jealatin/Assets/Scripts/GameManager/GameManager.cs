@@ -185,7 +185,6 @@ public class GameManager : MonoBehaviour
     {
         UpdateAnimationSpeed();
         MainAnimator.ResetTrigger("Trigger");
-        GameMode = Enums.GameMode.NoInteraction;
 
         MainAnimator.SetInteger("AnimationType", 1); // 1 = Fade to black
         MainAnimator.SetTrigger("Trigger");
@@ -257,7 +256,8 @@ public class GameManager : MonoBehaviour
                 //i.color = new Color(0.75f, 0.83f, 1f, 0.7f);
             }
 
-            if (GetSceneBuildIndex() >= GetTotalBuildScenes() - 1) // No more scenes, grey out/disable next
+            if (GetSceneBuildIndex() >= GetTotalBuildScenes() - 1 - 1) // No more scenes, grey out/disable next
+                                                                        // extra -1 due to the end cutscene
             {
                 pauseIcons[2].gameObject.SetActive(false);
             }

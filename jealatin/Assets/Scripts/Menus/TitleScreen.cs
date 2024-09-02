@@ -47,7 +47,7 @@ public class TitleScreen : MonoBehaviour
     void Update()
     {
         if (inputBlocked) return;
-
+        
         // Set the navigation vector
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) navVector = Vector2.up;
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) navVector = Vector2.down;
@@ -83,24 +83,25 @@ public class TitleScreen : MonoBehaviour
                 {
                     StartGame();
                 }
-                if (navVector == Vector2.up) HighlightMenuOption(3);
+                if (navVector == Vector2.up) HighlightMenuOption(2);
                 if (navVector == Vector2.down) HighlightMenuOption(1);
                 break;
-            case 1: // Level Select
+            case 1: // Skip Intro
+                if (navVector == Vector2.right || navVector.x == 2)
+                {
+                    ZParticles.Pause();
+                    GameManager.Instance.LoadScene(2);
+                }
+                if (navVector == Vector2.up) HighlightMenuOption(0);
+                if (navVector == Vector2.down) HighlightMenuOption(2);
+                break;
+            case 2: // Level Select
                 if (navVector == Vector2.right || navVector.x == 2)
                 {
                     ToggleLevelSelect();
                 }
-                if (navVector == Vector2.up) HighlightMenuOption(0);
-                if (navVector == Vector2.down) HighlightMenuOption(3); // Jump over settings
-                break;
-            case 2: // Settings
-                if (navVector == Vector2.right || navVector.x == 2)
-                {
-                    Debug.Log("No settings yet");
-                }
                 if (navVector == Vector2.up) HighlightMenuOption(1);
-                if (navVector == Vector2.down) HighlightMenuOption(3);
+                if (navVector == Vector2.down) HighlightMenuOption(0); // Jump over settings
                 break;
             case 3: // Exit
                 if (navVector == Vector2.right || navVector.x == 2) Application.Quit();
