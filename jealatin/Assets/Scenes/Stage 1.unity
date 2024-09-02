@@ -123,6 +123,39 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &956462103 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3044627751728202016, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+  m_PrefabInstance: {fileID: 8359325835657077617}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &967894679 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 877918873460730286, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+  m_PrefabInstance: {fileID: 8359325835657077617}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1414907849 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2600332734670000906, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+  m_PrefabInstance: {fileID: 8359325835657077617}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1756252152
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1745,6 +1778,22 @@ PrefabInstance:
       propertyPath: sfx.Array.data[2]
       value: 
       objectReference: {fileID: 8300000, guid: 496d17e084db8944cbcc28ee9a9fc974, type: 3}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: pauseIcons.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: pauseIcons.Array.data[0]
+      value: 
+      objectReference: {fileID: 956462103}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: pauseIcons.Array.data[1]
+      value: 
+      objectReference: {fileID: 1414907849}
+    - target: {fileID: 2468955566818172695, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: pauseIcons.Array.data[2]
+      value: 
+      objectReference: {fileID: 967894679}
     - target: {fileID: 4501320115438130207, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1792,6 +1841,10 @@ PrefabInstance:
     - target: {fileID: 8034708616903102839, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290247578769458960, guid: 071d4238b335aaa44b23b2e4284f4e1a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

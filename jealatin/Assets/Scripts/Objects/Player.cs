@@ -106,6 +106,12 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Backspace)) this.Undo();
             else if (undoDelayCoroutine == null && (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.Backspace))) this.Undo(); // For holding z
 
+            else if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            {
+                GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
+                GameManager.Instance.TogglePause();
+            }
+
             if (Input.GetKeyDown(KeyCode.R))
             {
                 FullReset();

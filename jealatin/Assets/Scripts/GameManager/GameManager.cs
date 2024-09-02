@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,7 +37,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip[] sfx;
     private AudioSource sound;
 
+    [SerializeField] private Image[] pauseIcons;
     private Animator MainAnimator;
+    private Enums.GameMode storedPauseMode;
+    private bool isAnimating;
 
     void Awake()
     {
@@ -68,6 +72,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (isAnimating) return;
+
         // Gameplay speed-up by holding shift. Useful for long undos.
         if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
         {
@@ -78,6 +84,29 @@ public class GameManager : MonoBehaviour
             ResetAnimationSpeed();
         }
         // if (Input.GetKeyDown(KeyCode.P)) Debug.Log("GameMode: " + GameMode);
+
+        // Open pause menu
+        if (GameMode == Enums.GameMode.Game)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            {
+                TogglePause();
+            }
+        }
+        else if (GameMode == Enums.GameMode.PauseMenu)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace)
+             || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) TogglePause();
+
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                GameMode = Enums.GameMode.LevelSelect;
+                LoadScene(0);
+            }
+
+            if (pauseIcons[2].gameObject.activeSelf && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))) LoadNextScene();
+            if (pauseIcons[0].gameObject.activeSelf && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))) LoadPrevScene();
+        }
     }
 
     public bool canPlayerMove()
@@ -99,7 +128,7 @@ public class GameManager : MonoBehaviour
     {
         int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
 
-        if (nextScene >= SceneManager.sceneCountInBuildSettings) // Reached the end of the levels -> go to level select
+        if (nextScene >= GetTotalBuildScenes()) // Reached the end of the levels -> go to level select
         {
             if (GameMode == Enums.GameMode.LevelClear) GameMode = Enums.GameMode.LevelSelect;
             else GameMode = Enums.GameMode.MainMenu;
@@ -110,6 +139,16 @@ public class GameManager : MonoBehaviour
         else StartCoroutine(LoadNextSceneCoroutine(nextScene));
     }
 
+    public void LoadPrevScene(bool fade = true)
+    {
+        int prevScene = SceneManager.GetActiveScene().buildIndex - 1;
+
+        if (prevScene < 0) prevScene = 0;
+
+        if (!fade) SceneManager.LoadScene(prevScene);
+        else StartCoroutine(LoadNextSceneCoroutine(prevScene));
+    }
+
     public void LoadScene(int buildIndex, bool fade = true)
     {
         if (!fade) SceneManager.LoadScene(buildIndex);
@@ -118,28 +157,52 @@ public class GameManager : MonoBehaviour
 
     public void LoadScene(string sceneName, bool fade = true)
     {
+        if (fade) isAnimating = true;
+
         int nextScene = SceneManager.GetSceneByName(sceneName).buildIndex;
-        if (!fade) SceneManager.LoadScene(nextScene);
-        else StartCoroutine(LoadNextSceneCoroutine(nextScene));
+        if (!fade)
+        {
+            SceneManager.LoadScene(nextScene);
+        }
+        else
+        {
+            StopAllCoroutines();
+            StartCoroutine(LoadNextSceneCoroutine(nextScene));
+        }
+    }
+
+    public int GetSceneBuildIndex()
+    {
+        return SceneManager.GetActiveScene().buildIndex;
+    }
+
+    public int GetTotalBuildScenes()
+    {
+        return SceneManager.sceneCountInBuildSettings;
     }
 
     private IEnumerator LoadNextSceneCoroutine(int buildIndex)
     {
         UpdateAnimationSpeed();
+        MainAnimator.ResetTrigger("Trigger");
+        GameMode = Enums.GameMode.NoInteraction;
 
         MainAnimator.SetInteger("AnimationType", 1); // 1 = Fade to black
         MainAnimator.SetTrigger("Trigger");
         yield return new WaitForSeconds(0.666f / animationSpeed);
         MainAnimator.ResetTrigger("Trigger");
 
-        if (buildIndex == 1) GameMode = Enums.GameMode.Cutscene;
-        else if (buildIndex > 1) GameMode = Enums.GameMode.Game;
         SceneManager.LoadScene(buildIndex);
 
         MainAnimator.SetInteger("AnimationType", 0); // 0 = Fade from black
         MainAnimator.SetTrigger("Trigger");
         yield return new WaitForSeconds(0.666f / animationSpeed);
         MainAnimator.ResetTrigger("Trigger");
+
+        if (buildIndex == 1) GameMode = Enums.GameMode.Cutscene;
+        else if (buildIndex > 1) GameMode = Enums.GameMode.Game;
+
+        isAnimating = false;
     }
 
     public void PlaySound(int clipID)
@@ -163,5 +226,62 @@ public class GameManager : MonoBehaviour
         }
         if (sfxID >= sfx.Length) Debug.Log("Sound " + sfxID + " does not exist!");
         PlaySound(sfxID);
+    }
+
+    public void TogglePause()
+    {
+        if (isAnimating) return;
+        // if (GameMode != Enums.GameMode.PauseMenu) storedPauseMode = GameMode;
+        if (GameMode != Enums.GameMode.PauseMenu) storedPauseMode = Enums.GameMode.Game;
+        isAnimating = true;
+        StartCoroutine(TogglePauseCoroutine());
+    }
+
+    private IEnumerator TogglePauseCoroutine()
+    {
+        // if (!MainAnimator.GetCurrentAnimatorStateInfo(0).IsName("Main")
+        //    && !MainAnimator.GetCurrentAnimatorStateInfo(0).IsName("Pause On")) yield break;
+
+        UpdateAnimationSpeed();
+        if (GameMode == Enums.GameMode.PauseMenu)
+        {
+            MainAnimator.SetInteger("AnimationType", 0); // Close pause menu
+        }
+        else
+        {
+            MainAnimator.SetInteger("AnimationType", 2); // Open pause menu
+
+            foreach (var i in pauseIcons)
+            {
+                i.gameObject.SetActive(true);
+                //i.color = new Color(0.75f, 0.83f, 1f, 0.7f);
+            }
+
+            if (GetSceneBuildIndex() >= GetTotalBuildScenes() - 1) // No more scenes, grey out/disable next
+            {
+                pauseIcons[2].gameObject.SetActive(false);
+            }
+            else if (GetSceneBuildIndex() == 2) // First gameplay scene, can't go back
+            {
+                pauseIcons[0].gameObject.SetActive(false);
+            }
+        }
+
+        MainAnimator.ResetTrigger("Trigger");
+        MainAnimator.SetTrigger("Trigger");
+        yield return new WaitForSeconds(0.34f / animationSpeed);
+        MainAnimator.ResetTrigger("Trigger");
+
+        if (GameMode == Enums.GameMode.PauseMenu)
+        {
+            GameMode = storedPauseMode;
+        }
+        else
+        {
+            GameMode = Enums.GameMode.PauseMenu;
+        }
+        isAnimating = false;
+        
+        Debug.Log("Toggle Pause Coroutine  - Game mode is now: " + GameMode);
     }
 }

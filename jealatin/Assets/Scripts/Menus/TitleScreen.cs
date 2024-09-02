@@ -30,9 +30,14 @@ public class TitleScreen : MonoBehaviour
         HighlightMenuOption(0);
         TitleAnimator.ResetTrigger("Trigger");
 
-        if (GameManager.Instance.GameMode == Enums.GameMode.MainMenu) TitleAnimator.SetInteger("AnimationType", 0);
+        if (GameManager.Instance.GameMode == Enums.GameMode.MainMenu)
+        {  
+            curMenuSelect = 0;
+            TitleAnimator.SetInteger("AnimationType", 0);
+        }
         else if (GameManager.Instance.GameMode == Enums.GameMode.LevelSelect)
         {
+            curMenuSelect = 1;
             ZParticles.Pause();
             ZParticles.Clear();
             TitleAnimator.SetInteger("AnimationType", 1);
@@ -117,9 +122,11 @@ public class TitleScreen : MonoBehaviour
         {
             MenuButtons[i].color = new Color(0.7f, 0.8f, 0.8f, 0.65f);
             MenuButtons[i].gameObject.transform.localScale = Vector3.one;
+            MenuButtons[i].GetComponentsInChildren<Image>()[1].enabled = false;
         }
         MenuButtons[select].color = new Color(0.8f, 0.9f, 0.9f, 0.9f);
         MenuButtons[select].gameObject.transform.localScale = new Vector3(1.05f, 1.05f);
+        MenuButtons[select].GetComponentsInChildren<Image>()[1].enabled = true;
         curMenuSelect = select;
     }
 
