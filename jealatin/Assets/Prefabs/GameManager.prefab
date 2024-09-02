@@ -1051,6 +1051,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 567d679c2721e4349a43e14d8f2d08ca, type: 3}
   - {fileID: 8300000, guid: e815493a965a4c3489d53ea241f8f72f, type: 3}
   - {fileID: 8300000, guid: 496d17e084db8944cbcc28ee9a9fc974, type: 3}
+  pauseIcons:
+  - {fileID: 3044627751728202016}
+  - {fileID: 2600332734670000906}
+  - {fileID: 877918873460730286}
 --- !u!95 &3738127219637484311
 Animator:
   serializedVersion: 5

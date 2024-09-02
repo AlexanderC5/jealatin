@@ -77,11 +77,11 @@ public class Player : MonoBehaviour
 
             DeathAnimation();
         }
-
+        
 
         // Player wins if they are out of bounds
-        if ((this.Pos.y > GameManager.Instance.StageSize.yMax)
-         || (this.Pos.x > GameManager.Instance.StageSize.xMax)
+        if ((this.Pos.y > GameManager.Instance.StageSize.yMax-1)
+         || (this.Pos.x > GameManager.Instance.StageSize.xMax-1)
          || (this.Pos.y < GameManager.Instance.StageSize.yMin)
          || (this.Pos.x < GameManager.Instance.StageSize.xMin))
         {
@@ -416,7 +416,10 @@ public class Player : MonoBehaviour
         {
             if (colorStack.Count <= 1) Debug.Log("No colors in the color stack to pop!");
             colorStack.Pop();
+            
+            IsDead = false; // Scuffed code to temporarily allow the expression to show up when undo-ing a death
             this.SetColor(colorStack.Peek(), false);
+            IsDead = true;
 
             hit.transform.gameObject.GetComponent<Object>().UndoColor();
             
@@ -544,6 +547,12 @@ public class Player : MonoBehaviour
 
     private void UpdateExpression()
     {
+        if (IsDead)
+        {
+            PlayerSprite[1].sprite = expressionsSprites[0];
+            return;
+        }
+
         int spriteIndex = 0; // 0 = No sprite
         PlayerSprite[1].flipX = false;
 
