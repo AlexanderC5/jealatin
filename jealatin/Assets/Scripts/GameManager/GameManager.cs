@@ -149,27 +149,28 @@ public class GameManager : MonoBehaviour
         else StartCoroutine(LoadNextSceneCoroutine(prevScene));
     }
 
-    public void LoadScene(int buildIndex, bool fade = true)
+    public void LoadScene(int buildIndex)
     {
+        bool fade = true;
         if (!fade) SceneManager.LoadScene(buildIndex);
         else StartCoroutine(LoadNextSceneCoroutine(buildIndex));
     }
 
-    public void LoadScene(string sceneName, bool fade = true)
-    {
-        if (fade) isAnimating = true;
+    // public void LoadScene(string sceneName, bool fade = true)
+    // {
+    //     if (fade) isAnimating = true;
 
-        int nextScene = SceneManager.GetSceneByName(sceneName).buildIndex;
-        if (!fade)
-        {
-            SceneManager.LoadScene(nextScene);
-        }
-        else
-        {
-            StopAllCoroutines();
-            StartCoroutine(LoadNextSceneCoroutine(nextScene));
-        }
-    }
+    //     int nextScene = SceneManager.GetSceneByName(sceneName).buildIndex;
+    //     if (!fade)
+    //     {
+    //         SceneManager.LoadScene(nextScene);
+    //     }
+    //     else
+    //     {
+    //         StopAllCoroutines();
+    //         StartCoroutine(LoadNextSceneCoroutine(nextScene));
+    //     }
+    // }
 
     public int GetSceneBuildIndex()
     {

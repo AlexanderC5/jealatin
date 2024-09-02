@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TitleScreen : MonoBehaviour
 {
     [SerializeField] private Image[] MenuButtons;
+    [SerializeField] private Image[] LevelButtons;
     [SerializeField] private Image[] TitleLetters;
     [SerializeField] private ParticleSystem ZParticles;
 
@@ -13,6 +14,7 @@ public class TitleScreen : MonoBehaviour
 
     private Vector2 navVector = Vector2.zero;
     private int curMenuSelect = 0;
+    private int curLevelSelect = 0;
 
     private Coroutine inputDelayCoroutine;
     private float inputDelay = 0.2f;
@@ -46,11 +48,13 @@ public class TitleScreen : MonoBehaviour
 
     void Update()
     {
-        if (inputBlocked) return;
-        
-        // Set the navigation vector
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) navVector = Vector2.up;
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) navVector = Vector2.down;
+        if (!inputBlocked)
+        {
+            // Set the navigation vector
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) navVector = Vector2.up;
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) navVector = Vector2.down;
+        }
+
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) navVector = Vector2.right;
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) navVector = Vector2.left;
         
@@ -69,12 +73,6 @@ public class TitleScreen : MonoBehaviour
         inputDelayCoroutine = StartCoroutine(InputDelay());
 
         GameManager.Instance.PlaySound("move_sfx");
-
-        // if (navVector == Vector2.left || navVector.x == -2) // Highlight exit
-        // {
-        //     HighlightMenuOption(MenuButtons.Length - 1); // Select exit
-        //     return;
-        // }
 
         switch(curMenuSelect)
         {
@@ -134,6 +132,7 @@ public class TitleScreen : MonoBehaviour
     private void SelectLevel()
     {
         if (navVector == Vector2.zero) return; /// No input detected
+        inputDelayCoroutine = StartCoroutine(InputDelay());
 
         GameManager.Instance.PlaySound("move_sfx");
         
@@ -143,10 +142,49 @@ public class TitleScreen : MonoBehaviour
             return;
         }
 
-        inputDelayCoroutine = StartCoroutine(InputDelay());
+        if (navVector.x == 2)
+        {
+            GameManager.Instance.LoadScene(curLevelSelect + 2);
+        }
+
+        if (navVector == Vector2.up)
+        {
+            curLevelSelect -= 4;
+            if (curLevelSelect < 0) curLevelSelect = 0;
+        }
+        else if (navVector == Vector2.right)
+        {
+            curLevelSelect += 1;
+            if (curLevelSelect >= LevelButtons.Length) curLevelSelect = LevelButtons.Length - 1;
+
+        }
+        else if (navVector == Vector2.down)
+        {
+            curLevelSelect += 4;
+            if (curLevelSelect >= LevelButtons.Length) curLevelSelect = LevelButtons.Length - 1;
+        }
+        else if (navVector == Vector2.left)
+        {
+            curLevelSelect -= 1;
+            if (curLevelSelect < 0) curLevelSelect = 0;
+        }
         
         navVector = Vector2.zero;
+        HighlightLevel(curLevelSelect);
     }
+    private void HighlightLevel(int select)
+    {
+        //Debug.Log("Highlighting menu option " + select);
+        for (int i = 0; i < LevelButtons.Length; i++) // These menu options are not selected:
+        {
+            LevelButtons[i].color = new Color(0.73f, 0.89f, 1f, 0.84f);
+            LevelButtons[i].gameObject.transform.localScale = Vector3.one;
+        }
+        LevelButtons[select].color = new Color(1f, 0.98f, 0.73f, 0.84f);
+        LevelButtons[select].gameObject.transform.localScale = new Vector3(1.05f, 1.05f);
+        curLevelSelect = select;
+    }
+
 
     IEnumerator InputDelay()
     {
