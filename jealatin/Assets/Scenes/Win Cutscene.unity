@@ -649,7 +649,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   imageSlides:
-  - {fileID: 21300000, guid: fde1f932c4c5b804ca14c1c78fe6d89f, type: 3}
+  - {fileID: 21300000, guid: 32f2247db4f3d5e49b237496243d0ca9, type: 3}
 --- !u!95 &1387109897
 Animator:
   serializedVersion: 5

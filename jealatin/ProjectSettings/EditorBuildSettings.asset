@@ -26,4 +26,22 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Stage 5.unity
     guid: af5d7c63012f3864ea7ebef5860a3a45
+  - enabled: 1
+    path: Assets/Scenes/Stage 6.unity
+    guid: e947b5af6121b6349a95e9812380661c
+  - enabled: 1
+    path: Assets/Scenes/Stage 7.unity
+    guid: 1f7670cb99f21ec42af87d209e5e6a3d
+  - enabled: 1
+    path: Assets/Scenes/Stage 8.unity
+    guid: 8302103753a6e044c9f63fc7752a353e
+  - enabled: 1
+    path: Assets/Scenes/Stage 9.unity
+    guid: 7cab9a62845c94b4f8651b1d46332f96
+  - enabled: 1
+    path: Assets/Scenes/Stage 10.unity
+    guid: 2b3a358a5e15f6c43b7b03fc44fbde75
+  - enabled: 1
+    path: Assets/Scenes/Win Cutscene.unity
+    guid: 4189f9aaf23ed9a43a78e513df6eb7e4
   m_configObjects: {}
