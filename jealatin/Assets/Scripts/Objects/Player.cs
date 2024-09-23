@@ -106,7 +106,7 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Backspace)) this.Undo();
             else if (undoDelayCoroutine == null && (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.Backspace))) this.Undo(); // For holding z
 
-            else if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            else if (Input.GetKeyDown(KeyCode.Escape)/** || Input.GetKeyDown(KeyCode.Backspace)**/)
             {
                 GameManager.Instance.GameMode = Enums.GameMode.NoInteraction;
                 GameManager.Instance.TogglePause();
@@ -439,8 +439,8 @@ public class Player : MonoBehaviour
             this.Pos -= dirMoved; // Undo Player move action
         }
 
-        SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
         PlayerAnimator.SetInteger("AnimationType", 0); // 0 = idle-type animation
+        SetPlayerLocation(this.Pos, lastFacingDir); // Update the player's location & facing from the action taken two-turns ago
         IsDead = false; // Player is no longer deada if the undo removes the death
 
         // Start Undo-Cooldown Coroutine for holding z
@@ -501,6 +501,7 @@ public class Player : MonoBehaviour
                 PlayerAnimator.SetTrigger("Left");
                 break;
         }
+        UpdateExpression();
     }
 
     public void FullReset() // When 'R' key pressed. Cannot be undone

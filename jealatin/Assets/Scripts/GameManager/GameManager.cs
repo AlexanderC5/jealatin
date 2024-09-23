@@ -37,6 +37,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip[] sfx;
     private AudioSource sound;
 
+    public int prevScene = 0;
+
     [SerializeField] private Image[] pauseIcons;
     private Animator MainAnimator;
     private Enums.GameMode storedPauseMode;
@@ -88,7 +90,7 @@ public class GameManager : MonoBehaviour
         // Open pause menu
         if (GameMode == Enums.GameMode.Game)
         {
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            if (Input.GetKeyDown(KeyCode.Escape)/** || Input.GetKeyDown(KeyCode.Backspace)**/)
             {
                 TogglePause();
             }
@@ -152,6 +154,7 @@ public class GameManager : MonoBehaviour
     public void LoadScene(int buildIndex)
     {
         bool fade = true;
+        prevScene = SceneManager.GetActiveScene().buildIndex;
         if (!fade) SceneManager.LoadScene(buildIndex);
         else StartCoroutine(LoadNextSceneCoroutine(buildIndex));
     }

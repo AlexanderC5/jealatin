@@ -44,6 +44,13 @@ public class TitleScreen : MonoBehaviour
             ZParticles.Clear();
             TitleAnimator.SetInteger("AnimationType", 1);
         }
+
+        // Select level if returned to level-select from game
+        if (GameManager.Instance.prevScene > 2) // If a gameplay scene
+        {
+            curLevelSelect = GameManager.Instance.prevScene - 2;
+            HighlightLevel(curLevelSelect);
+        }
     }
 
     void Update()
