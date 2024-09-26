@@ -141,6 +141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c5c0d8e42f3484ba8dc3a623b779bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minCameraSize: 3
-  xPadding: 0000000000000000
+  minCameraSize: 5
+  xPadding: 0000000002000000
   yPadding: 0000000000000000
